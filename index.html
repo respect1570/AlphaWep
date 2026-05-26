@@ -430,16 +430,16 @@ main{position:relative;z-index:1;padding-top:64px;}
 // ✅ الإعدادات
 // ⚠️ ضع CLIENT_ID وإلا لن يعمل تسجيل الدخول ولا زر الأدمن
 // ============================================================
-const SUPABASE_URL  = 'https://tquxpfsjumyrkssucxdx.supabase.co';
-const SUPABASE_ANON = 'sb_publishable_eRaoAv_i5UUDWtLptIS3Qg_q1ar2HuB';
-const CLIENT_ID     = '1508650244110422087'; // ← ضع هنا CLIENT_ID من Discord Developer Portal
-const REDIRECT_URI  = window.location.origin + window.location.pathname;
+const SUPABASE_URL='https://tquxpfsjumyrkssucxdx.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxdXhwZnNqdW15cmtzc3VjeGR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NTc4NzEsImV4cCI6MjA5NTMzMzg3MX0.jCw1qW8MqbtQR6T_nLAVTSYx88h3DYKA-h-fVsdigaA';
+const CLIENT_ID='1508650244110422087'; // ← ضع هنا CLIENT_ID من Discord Developer Portal
+const REDIRECT_URI=window.location.origin + window.location.pathname;
 
 // Whitelists
-const ALLOWED_SECTIONS = new Set(['home','news','rules','apps']);
-const UUID_REGEX       = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const DISCORD_ID_REGEX = /^\d{17,19}$/;
-const AVATAR_REGEX     = /^[a-f0-9_]{32,}$/i;
+const ALLOWED_SECTIONS=new Set(['home','news','rules','apps']);
+const UUID_REGEX=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const DISCORD_ID_REGEX=/^\d{17,19}$/;
+const AVATAR_REGEX=/^[a-f0-9_]{32,}$/i;
 
 const _supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
