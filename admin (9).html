@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ✅ CSP محكمة للـ admin panel -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'none';
+        script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
+        font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+        img-src 'self' https://cdn.discordapp.com data:;
+        connect-src 'self' https://tquxpfsjumyrkssucxdx.supabase.co https://discord.com;
+        frame-ancestors 'none';
+        base-uri 'self';
+        form-action 'none';
+    ">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="no-referrer">
+    <title>RoyalCity | لوحة التحكم</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --purple-dark:  #1a0033;
+            --purple-main:  #6b21a8;
+            --purple-mid:   #7c3aed;
+            --purple-light: #a855f7;
+            --purple-glow:  #c084fc;
+            --purple-pale:  #e9d5ff;
+            --bg-deep:      #080010;
+            --card-bg:      #0e001e;
+            --card-border:  #2d1060;
+            --text-muted:   #8b7aa0;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Almarai', sans-serif;
+            background: var(--bg-deep);
+            color: #f0e6ff;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 20% 50%, rgba(107,33,168,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 60% at 80% 20%, rgba(124,58,237,0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 270px;
+            height: 100vh;
+            position: fixed;
+            right: 0;
+            top: 0;
+            z-index: 100;
+            background: rgba(8,0,18,0.98);
+            backdrop-filter: blur(30px);
+            border-left: 1px solid rgba(107,33,168,0.2);
+            box-shadow: -4px 0 40px rgba(107,33,168,0.1);
+            display: flex;
+            flex-direction: column;
+            padding: 28px 20px;
+        }
+
+        .main-content {
+            margin-right: 270px;
+            padding: 36px 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Nav buttons */
+        .nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 13px 16px;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            color: #9d82b8;
+            border: 1px solid transparent;
+            background: none;
+            width: 100%;
+            text-align: right;
+            font-family: 'Almarai', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .nav-btn:hover {
+            background: rgba(107,33,168,0.15);
+            border-color: rgba(168,85,247,0.2);
+            color: var(--purple-pale);
+        }
+
+        .nav-btn.active {
+            background: rgba(107,33,168,0.2);
+            border-color: rgba(168,85,247,0.3);
+            color: var(--purple-pale);
+        }
+
+        .nav-icon { color: var(--purple-light); width: 20px; text-align: center; }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 20px 22px;
+            margin-bottom: 12px;
+            transition: 0.25s;
+        }
+
+        .card:hover {
+            border-color: rgba(168,85,247,0.3);
+        }
+
+        /* Inputs */
+        input, textarea, select {
+            background: rgba(8,0,20,0.8) !important;
+            border: 1px solid rgba(107,33,168,0.25) !important;
+            color: #e2d4f5 !important;
+            padding: 13px 16px;
+            border-radius: 14px;
+            width: 100%;
+            outline: none;
+            font-family: 'Almarai', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: var(--purple-light) !important;
+            box-shadow: 0 0 0 3px rgba(168,85,247,0.1) !important;
+        }
+
+        input::placeholder, textarea::placeholder { color: #4a3d5c !important; }
+
+        select option { background: #0e001e; color: #e2d4f5; }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--purple-main), var(--purple-light));
+            font-weight: 800;
+            border-radius: 14px;
+            transition: 0.3s;
+            cursor: pointer;
+            border: none;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Almarai', sans-serif;
+            box-shadow: 0 4px 20px rgba(107,33,168,0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(107,33,168,0.5);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: rgba(45,16,96,0.3);
+            border: 1px solid rgba(107,33,168,0.2);
+            color: var(--text-muted);
+            border-radius: 14px;
+            padding: 12px 20px;
+            font-family: 'Almarai', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(107,33,168,0.15);
+            color: var(--purple-pale);
+        }
+
+        /* Toast */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(8,0,20,0.98);
+            border: 1px solid var(--purple-main);
+            color: white;
+            padding: 13px 30px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 0.88rem;
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            z-index: 99999;
+            pointer-events: none;
+            box-shadow: 0 8px 30px rgba(107,33,168,0.4);
+        }
+
+        #toast.show { transform: translateX(-50%) translateY(0); }
+
+        /* Confirm Dialog */
+        #confirm-dialog {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            z-index: 99998;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+
+        #confirm-dialog.show { display: flex; }
+
+        #confirm-dialog .box {
+            background: var(--card-bg);
+            border: 1px solid rgba(107,33,168,0.35);
+            border-radius: 24px;
+            padding: 36px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 80px rgba(107,33,168,0.3);
+        }
+
+        /* Section Title */
+        .section-title {
+            font-size: 2rem;
+            font-weight: 800;
+            font-style: italic;
+            background: linear-gradient(135deg, #fff, var(--purple-pale));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Badge */
+        .badge-open   { background: rgba(34,197,94,0.1);  color: #4ade80; border: 1px solid rgba(34,197,94,0.2); padding: 3px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; }
+        .badge-closed { background: rgba(168,85,247,0.1); color: var(--purple-glow); border: 1px solid rgba(168,85,247,0.2); padding: 3px 10px; border-radius: 50px; font-size: 0.7rem; font-weight: 800; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--purple-main); border-radius: 10px; }
+
+        /* Loading */
+        #loading-overlay {
+            background: radial-gradient(ellipse at center, #0d0020 0%, #000 100%);
+        }
+
+        .hidden { display: none !important; }
+
+        /* Divider */
+        .divider { border-color: rgba(107,33,168,0.12); }
+
+        /* Glow effect on logo */
+        .logo-glow {
+            background: linear-gradient(135deg, var(--purple-main), var(--purple-light));
+            box-shadow: 0 0 20px rgba(168,85,247,0.4);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(12px);
+        }
+
+        .modal-box {
+            background: var(--bg-deep);
+            border: 1px solid rgba(107,33,168,0.3);
+            border-radius: 28px;
+            box-shadow: 0 30px 100px rgba(107,33,168,0.3);
+        }
+
+        /* Admin btn */
+        .admin-btn { display: none; }
+    </style>
+</head>
+<body>
+
+<!-- Toast -->
+<div id="toast" role="alert" aria-live="polite"></div>
+
+<!-- Confirm Dialog -->
+<div id="confirm-dialog">
+    <div class="box">
+        <i class="fas fa-exclamation-triangle text-4xl mb-5 block" style="color: var(--purple-glow);"></i>
+        <p id="confirm-msg" class="font-bold text-lg mb-7" style="color: #e2d4f5;"></p>
+        <div class="flex gap-3">
+            <button id="confirm-yes" class="btn-primary flex-1 py-3">تأكيد</button>
+            <button id="confirm-no"  class="btn-secondary flex-1">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- شاشة التحميل -->
+<div id="loading-overlay" class="fixed inset-0 z-[9999] flex flex-col items-center justify-center">
+    <div style="width:56px; height:56px; border-radius:50%; border:3px solid rgba(107,33,168,0.15); border-top-color: var(--purple-light); animation: spin 0.8s linear infinite; margin-bottom:16px;"></div>
+    <p style="color: var(--purple-light); font-weight: 800; letter-spacing:1px; font-size:0.85rem;">جاري التحقق من الصلاحيات...</p>
+    <style>@keyframes spin { to { transform: rotate(360deg); } }</style>
+</div>
+
+<!-- القائمة الجانبية -->
+<aside class="sidebar">
+    <div class="mb-8 text-center">
+        <div class="logo-glow w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+            <i class="fas fa-crown text-white text-2xl"></i>
+        </div>
+        <h1 class="text-xl font-black italic" style="background: linear-gradient(135deg,#fff,var(--purple-pale)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">
+            RoyalCity <span style="background: linear-gradient(135deg,var(--purple-light),var(--purple-glow)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">CP</span>
+        </h1>
+        <p id="role-display" style="color: var(--text-muted); font-size:0.65rem; margin-top:6px; font-weight:800; letter-spacing:2px; text-transform:uppercase;"></p>
+    </div>
+
+    <nav class="flex flex-col gap-1 flex-1">
+        <button onclick="nav('news')"      class="nav-btn"><i class="fas fa-rss nav-icon"></i> الأخبار</button>
+        <button onclick="nav('rules')"     class="nav-btn"><i class="fas fa-scroll nav-icon"></i> القوانين</button>
+        <button onclick="nav('forms')"     class="nav-btn"><i class="fas fa-edit nav-icon"></i> التقديمات</button>
+        <button onclick="nav('blacklist')" class="nav-btn"><i class="fas fa-user-slash nav-icon"></i> البلاك ليست</button>
+        <button onclick="nav('staff')"     class="nav-btn"><i class="fas fa-users-cog nav-icon"></i> الإدارة</button>
+    </nav>
+
+    <div>
+        <hr class="divider mb-4">
+        <button onclick="logout()" class="nav-btn" style="color: #4a3d5c;" onmouseover="this.style.color='var(--purple-light)'" onmouseout="this.style.color='#4a3d5c'">
+            <i class="fas fa-sign-out-alt nav-icon"></i> خروج
+        </button>
+        <p style="color: #2d1a40; font-size:0.6rem; text-align:center; margin-top:14px;">© 2025 RoyalCity RP</p>
+    </div>
+</aside>
+
+<!-- المحتوى -->
+<main class="main-content">
+
+    <!-- الأخبار -->
+    <section id="sec-news">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="section-title">الأخبار</h2>
+            <button onclick="openNewsModal('news')" class="btn-primary px-6 py-3 admin-btn text-sm">
+                <i class="fas fa-plus"></i> إضافة خبر
+            </button>
+        </div>
+        <div id="list-news"></div>
+    </section>
+
+    <!-- القوانين -->
+    <section id="sec-rules" class="hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="section-title">القوانين</h2>
+            <button onclick="openNewsModal('rules')" class="btn-primary px-6 py-3 admin-btn text-sm">
+                <i class="fas fa-plus"></i> إضافة قانون
+            </button>
+        </div>
+        <div id="list-rules"></div>
+    </section>
+
+    <!-- التقديمات -->
+    <section id="sec-forms" class="hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="section-title">التقديمات</h2>
+            <button onclick="openModal('app-modal')" class="btn-primary px-6 py-3 admin-btn text-sm">
+                <i class="fas fa-plus"></i> إنشاء قطاع
+            </button>
+        </div>
+        <div id="list-forms" class="grid md:grid-cols-2 gap-5"></div>
+    </section>
+
+    <!-- البلاك ليست -->
+    <section id="sec-blacklist" class="hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="section-title" style="border-right: 5px solid var(--purple-light); padding-right:16px;">BLACKLIST</h2>
+            <button onclick="openModal('bl-modal')" class="btn-primary px-6 py-3 admin-btn text-sm">
+                <i class="fas fa-plus"></i> إضافة حظر
+            </button>
+        </div>
+        <div id="list-blacklist" class="grid gap-3"></div>
+    </section>
+
+    <!-- الإدارة -->
+    <section id="sec-staff" class="hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h2 class="section-title">طاقم الإدارة</h2>
+            <button onclick="openModal('staff-modal')" class="btn-primary px-6 py-3 admin-btn text-sm">
+                <i class="fas fa-plus"></i> إضافة إداري
+            </button>
+        </div>
+        <div id="list-staff" class="grid gap-3"></div>
+    </section>
+</main>
+
+<!-- مودال إنشاء قطاع -->
+<div id="app-modal" class="modal-overlay fixed inset-0 hidden z-[5000] flex items-center justify-center p-6">
+    <div class="modal-box w-full max-w-2xl p-8 overflow-y-auto" style="max-height:90vh;">
+        <h3 class="text-2xl font-bold mb-6" style="color: var(--purple-light);">قطاع تقديم جديد</h3>
+        <input id="app-title" placeholder="اسم القطاع" class="mb-4" maxlength="100">
+        <textarea id="app-desc" placeholder="الوصف" class="mb-4" style="height:80px;" maxlength="500"></textarea>
+        <!-- ✅ Webhook يُحفظ في Supabase فقط — يُرسل من السيرفر لا من العميل -->
+        <input id="app-web" placeholder="Discord Webhook URL" class="mb-6" maxlength="300" type="url">
+        <div id="q-container" class="space-y-3 mb-5"></div>
+        <button onclick="addQField()" class="w-full py-3 rounded-xl mb-6 text-sm font-bold" style="background: rgba(107,33,168,0.1); border: 1px dashed rgba(107,33,168,0.3); color: var(--text-muted); cursor:pointer; transition:0.25s;" onmouseover="this.style.background='rgba(107,33,168,0.2)'" onmouseout="this.style.background='rgba(107,33,168,0.1)'">
+            + إضافة سؤال
+        </button>
+        <div class="flex gap-3">
+            <button onclick="saveForm()" class="btn-primary flex-1 py-4 text-base">حفظ</button>
+            <button onclick="closeModal('app-modal')" class="btn-secondary flex-1 py-4">إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<!-- مودال تعيين إداري -->
+<div id="staff-modal" class="modal-overlay fixed inset-0 hidden z-[5000] flex items-center justify-center p-6">
+    <div class="modal-box w-full max-w-md p-8">
+        <h3 class="text-2xl font-bold mb-6" style="color: var(--purple-light);">تعيين إداري</h3>
+        <input id="st-uid" placeholder="Discord ID (أرقام فقط)" class="mb-2" maxlength="19" pattern="\d{17,19}" inputmode="numeric">
+        <p class="text-xs mb-4" style="color: var(--text-muted);">مثال: 123456789012345678</p>
+        <select id="st-role" class="mb-6">
+            <option value="2">Moderator</option>
+            <option value="3">Admin</option>
+        </select>
+        <button onclick="confirmStaff()" class="btn-primary w-full py-4 text-base mb-3">تأكيد التعيين</button>
+        <button onclick="closeModal('staff-modal')" class="btn-secondary w-full py-3 text-sm">إلغاء</button>
+    </div>
+</div>
+
+<!-- مودال البلاك ليست -->
+<div id="bl-modal" class="modal-overlay fixed inset-0 hidden z-[5000] flex items-center justify-center p-6">
+    <div class="modal-box w-full max-w-md p-8">
+        <h3 class="text-2xl font-bold mb-6" style="color: var(--purple-light);">حظر مستخدم</h3>
+        <input id="bl-uid" placeholder="User ID (أرقام فقط)" class="mb-4" maxlength="19" pattern="\d{17,19}" inputmode="numeric">
+        <textarea id="bl-msg" placeholder="سبب الحظر..." class="mb-6" style="height:110px;" maxlength="500"></textarea>
+        <button onclick="confirmBlacklist()" class="btn-primary w-full py-4 text-base mb-3">تأكيد الحظر</button>
+        <button onclick="closeModal('bl-modal')" class="btn-secondary w-full py-3 text-sm">إلغاء</button>
+    </div>
+</div>
+
+<!-- مودال الأخبار / القوانين -->
+<div id="news-modal" class="modal-overlay fixed inset-0 hidden z-[5000] flex items-center justify-center p-6">
+    <div class="modal-box w-full max-w-md p-8">
+        <h3 id="news-modal-title" class="text-2xl font-bold mb-6" style="color: var(--purple-light);">إضافة محتوى</h3>
+        <input id="n-title" placeholder="العنوان" class="mb-4" maxlength="200">
+        <textarea id="n-txt" placeholder="التفاصيل..." class="mb-6" style="height:140px;" maxlength="2000"></textarea>
+        <button id="n-save-btn" class="btn-primary w-full py-4 text-base mb-3">نشر</button>
+        <button onclick="closeModal('news-modal')" class="btn-secondary w-full py-3 text-sm">إلغاء</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============================================================
+// ✅ الإعدادات
+// ============================================================
+const SUPABASE_URL  = 'https://tquxpfsjumyrkssucxdx.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRxdXhwZnNqdW15cmtzc3VjeGR4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk3NTc4NzEsImV4cCI6MjA5NTMzMzg3MX0.jCw1qW8MqbtQR6T_nLAVTSYx88h3DYKA-h-fVsdigaA';
+
+const DISCORD_ID_REGEX  = /^\d{17,19}$/;
+const WEBHOOK_REGEX     = /^https:\/\/discord(app)?\.com\/api\/webhooks\/\d+\/[\w\-]+$/;
+const OWNER_IDS = new Set(['1413745713439047807']);
+const ALLOWED_SECTIONS  = new Set(['news','rules','forms','blacklist','staff']);
+const ALLOWED_TABLES    = new Set(['news','rules','forms','blacklist','staff']);
+
+const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let currentUser = null;
+let currentRole = 0; // 0=لا شيء، 2=Mod، 3=Admin، 4=Owner
+
+// ============================================================
+// ✅ دوال مساعدة
+// ============================================================
+function sanitize(str, max = 500) {
+    if (typeof str !== 'string') return '';
+    return str.trim().substring(0, max);
+}
+
+let _toastTimer = null;
+function showToast(msg, duration = 3500) {
+    const t = document.getElementById('toast');
+    t.textContent = sanitize(msg, 150);
+    t.classList.add('show');
+    if (_toastTimer) clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function showConfirm(msg) {
+    return new Promise(resolve => {
+        const dialog = document.getElementById('confirm-dialog');
+        document.getElementById('confirm-msg').textContent = sanitize(msg, 200);
+        dialog.classList.add('show');
+
+        const cleanup = (result) => {
+            dialog.classList.remove('show');
+            const yes = document.getElementById('confirm-yes');
+            const no  = document.getElementById('confirm-no');
+            yes.replaceWith(yes.cloneNode(true));
+            no.replaceWith(no.cloneNode(true));
+            resolve(result);
+        };
+
+        document.getElementById('confirm-yes').onclick = () => cleanup(true);
+        document.getElementById('confirm-no').onclick  = () => cleanup(false);
+    });
+}
+
+// ============================================================
+// ✅ TokenStore
+// ============================================================
+const TokenStore = {
+    _key: '_rc_tkn_v3',
+    get() {
+        try {
+            const raw = sessionStorage.getItem(this._key);
+            return raw ? decodeURIComponent(atob(raw.split('').reverse().join(''))) : null;
+        } catch { return null; }
+    },
+    clear() {
+        try { sessionStorage.removeItem(this._key); } catch {}
+    }
+};
+
+// ============================================================
+// ✅ init
+// ============================================================
+async function init() {
+    const token = TokenStore.get();
+    if (!token) return redirect();
+
+    try {
+        const res = await fetch('https://discord.com/api/users/@me', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Invalid token');
+        const user = await res.json();
+
+        if (!DISCORD_ID_REGEX.test(user.id)) throw new Error('Invalid user');
+        currentUser = user;
+
+        // تحقق محلي أولاً (Owner ثابت)
+        if (OWNER_IDS.has(user.id)) {
+            currentRole = 4;
+        } else {
+            const { data: staffData, error } = await _supabase
+                .from('staff')
+                .select('role')
+                .eq('user_id', user.id)
+                .maybeSingle();
+            if (error || !staffData) return redirect();
+            currentRole = parseInt(staffData.role) || 0;
+            if (currentRole < 2) return redirect();
+        }
+
+        const roleNames = { 2:'MODERATOR', 3:'ADMIN', 4:'OWNER' };
+        document.getElementById('role-display').textContent = roleNames[currentRole] || 'STAFF';
+
+        if (currentRole >= 3) {
+            document.querySelectorAll('.admin-btn').forEach(b => {
+                b.classList.remove('hidden');
+                b.style.display = 'inline-flex';
+            });
+        }
+
+        document.getElementById('loading-overlay').classList.add('hidden');
+        nav('news');
+
+    } catch (e) {
+        console.warn('Auth failed:', e.message);
+        TokenStore.clear();
+        redirect();
+    }
+}
+
+function redirect() { window.location.replace('index.html'); }
+function logout()   { TokenStore.clear(); currentUser = null; redirect(); }
+
+// ============================================================
+// ✅ nav
+// ============================================================
+function nav(sec) {
+    if (!ALLOWED_SECTIONS.has(sec)) return;
+    document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+    const target = document.getElementById(`sec-${sec}`);
+    if (target) target.classList.remove('hidden');
+
+    // تحديث حالة الأزرار
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+    loadData(sec);
+}
+
+// ============================================================
+// ✅ loadData
+// ============================================================
+async function loadData(table) {
+    if (!ALLOWED_TABLES.has(table)) return;
+
+    const listEl = document.getElementById(`list-${table}`);
+    if (!listEl) return;
+    listEl.textContent = 'جاري التحميل...';
+
+    const columns = {
+        news:      'id, title, content, created_at',
+        rules:     'id, title, content',
+        forms:     'id, title, desc, is_open', // ✅ بدون webhook
+        blacklist: 'id, user_id, reason, created_at',
+        staff:     'id, user_id, role'
+    };
+
+    const { data, error } = await _supabase
+        .from(table)
+        .select(columns[table])
+        .order('created_at', { ascending: false })
+        .limit(100);
+
+    listEl.textContent = '';
+
+    if (error) {
+        const msg = document.createElement('p');
+        msg.style.color = '#f87171';
+        msg.style.textAlign = 'center';
+        msg.style.padding = '40px 0';
+        msg.textContent = 'خطأ في جلب البيانات';
+        listEl.appendChild(msg);
+        return;
+    }
+
+    if (!data?.length) {
+        const msg = document.createElement('p');
+        msg.style.color = 'var(--text-muted)';
+        msg.style.textAlign = 'center';
+        msg.style.padding = '40px 0';
+        msg.textContent = 'لا توجد بيانات';
+        listEl.appendChild(msg);
+        return;
+    }
+
+    const frag = document.createDocumentFragment();
+    data.forEach(item => frag.appendChild(createCard(table, item)));
+    listEl.appendChild(frag);
+}
+
+// ============================================================
+// ✅ createCard — بناء آمن بدون innerHTML من بيانات المستخدم
+// ============================================================
+function createCard(table, item) {
+    const card = document.createElement('div');
+    card.className = 'card flex justify-between items-center';
+
+    const info = document.createElement('div');
+    info.className = 'flex-1 min-w-0';
+
+    const h4 = document.createElement('h4');
+    h4.className = 'font-bold text-base truncate';
+    h4.style.color = '#e2d4f5';
+    h4.textContent = sanitize(item.title || item.user_id || '—', 100);
+
+    const p = document.createElement('p');
+    p.className = 'text-xs mt-1 truncate';
+    p.style.color = 'var(--text-muted)';
+    p.textContent = sanitize(item.content || item.desc || item.reason || roleLabel(item.role), 200);
+
+    info.appendChild(h4);
+    info.appendChild(p);
+    card.appendChild(info);
+
+    if (currentRole >= 2) {
+        const actions = document.createElement('div');
+        actions.className = 'flex gap-2 items-center mr-4 flex-shrink-0';
+
+        if (table === 'forms' && currentRole >= 3) {
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = `px-4 py-2 rounded-xl text-xs font-black transition ${
+                item.is_open ? 'badge-open' : 'badge-closed'
+            }`;
+            toggleBtn.textContent = item.is_open ? '🔓 مفتوح' : '🔒 مغلق';
+            toggleBtn.onclick = () => toggleForm(item.id, item.is_open, item.title);
+            actions.appendChild(toggleBtn);
+        }
+
+        if (currentRole >= 3) {
+            const delBtn = document.createElement('button');
+            delBtn.style.color = '#4a3d5c';
+            delBtn.style.padding = '8px 10px';
+            delBtn.style.background = 'none';
+            delBtn.style.border = 'none';
+            delBtn.style.cursor = 'pointer';
+            delBtn.style.transition = '0.2s';
+            delBtn.setAttribute('aria-label','حذف');
+            delBtn.onmouseover = () => delBtn.style.color = '#f87171';
+            delBtn.onmouseout  = () => delBtn.style.color = '#4a3d5c';
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-trash text-sm';
+            delBtn.appendChild(icon);
+            delBtn.onclick = () => del(table, item.id);
+            actions.appendChild(delBtn);
+        }
+
+        card.appendChild(actions);
+    }
+
+    return card;
+}
+
+function roleLabel(role) {
+    return { 2:'Moderator', 3:'Admin', 4:'Owner' }[role] || 'Staff';
+}
+
+// ============================================================
+// ✅ toggleForm
+// ============================================================
+async function toggleForm(id, currentState, title) {
+    const confirmed = await showConfirm(
+        `هل أنت متأكد من ${currentState ? 'إغلاق' : 'فتح'} تقديم: ${sanitize(title, 50)}؟`
+    );
+    if (!confirmed) return;
+
+    const { error } = await _supabase.from('forms').update({ is_open: !currentState }).eq('id', id);
+    if (!error) { showToast('✅ تم تحديث الحالة'); loadData('forms'); }
+    else showToast('❌ فشل تحديث الحالة');
+}
+
+// ============================================================
+// ✅ saveForm
+// ============================================================
+async function saveForm() {
+    if (currentRole < 3) { showToast('⛔ لا تملك صلاحية'); return; }
+
+    const title   = sanitize(document.getElementById('app-title').value, 100);
+    const desc    = sanitize(document.getElementById('app-desc').value, 500);
+    const webhook = sanitize(document.getElementById('app-web').value, 300);
+
+    if (!title) { showToast('أدخل اسم القطاع'); return; }
+
+    if (webhook && !WEBHOOK_REGEX.test(webhook)) {
+        showToast('❌ رابط Webhook غير صالح');
+        return;
+    }
+
+    const rows = document.querySelectorAll('.q-row');
+    const questions = Array.from(rows).slice(0, 20).map(r => {
+        const text = sanitize(r.querySelector('.q-val')?.value || '', 200);
+        const type = r.querySelector('.q-ty')?.value === 'choice' ? 'select' : 'text';
+        return { text, type };
+    }).filter(q => q.text);
+
+    if (!questions.length) { showToast('أضف سؤالاً واحداً على الأقل'); return; }
+
+    const btn = document.querySelector('#app-modal .btn-primary');
+    btn.disabled = true;
+    btn.textContent = 'جاري الحفظ...';
+
+    const { error } = await _supabase.from('forms').insert([{ title, desc, webhook, questions, is_open: true }]);
+
+    btn.disabled = false;
+    btn.textContent = 'حفظ';
+
+    if (!error) { showToast('✅ تم إنشاء القطاع'); closeModal('app-modal'); loadData('forms'); }
+    else showToast('❌ خطأ في الحفظ');
+}
+
+// ============================================================
+// ✅ addQField
+// ============================================================
+function addQField() {
+    const container = document.getElementById('q-container');
+    if (container.querySelectorAll('.q-row').length >= 20) {
+        showToast('الحد الأقصى 20 سؤال');
+        return;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'flex gap-2 q-row';
+
+    const input = document.createElement('input');
+    input.className   = 'q-val flex-[3]';
+    input.placeholder = 'نص السؤال';
+    input.maxLength   = 200;
+    input.type        = 'text';
+
+    const select = document.createElement('select');
+    select.className = 'q-ty flex-1';
+    [{ v:'text',l:'كتابة' }, { v:'choice',l:'اختياري' }].forEach(({ v, l }) => {
+        const o = document.createElement('option');
+        o.value = v; o.textContent = l;
+        select.appendChild(o);
+    });
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.style.cssText = 'color:#4a3d5c; padding:8px 12px; background:rgba(107,33,168,0.1); border:none; border-radius:10px; cursor:pointer; transition:0.2s; flex-shrink:0;';
+    delBtn.setAttribute('aria-label','حذف السؤال');
+    delBtn.textContent = '✕';
+    delBtn.onmouseover = () => { delBtn.style.color = '#f87171'; delBtn.style.background = 'rgba(248,113,113,0.1)'; };
+    delBtn.onmouseout  = () => { delBtn.style.color = '#4a3d5c'; delBtn.style.background = 'rgba(107,33,168,0.1)'; };
+    delBtn.onclick = () => row.remove();
+
+    row.appendChild(input);
+    row.appendChild(select);
+    row.appendChild(delBtn);
+    container.appendChild(row);
+}
+
+// ============================================================
+// ✅ confirmStaff
+// ============================================================
+async function confirmStaff() {
+    if (currentRole < 3) { showToast('⛔ لا تملك صلاحية'); return; }
+
+    const uid  = sanitize(document.getElementById('st-uid').value, 20);
+    const role = parseInt(document.getElementById('st-role').value);
+
+    if (!DISCORD_ID_REGEX.test(uid)) {
+        showToast('❌ Discord ID غير صالح (17-19 رقم)');
+        return;
+    }
+    if (![2, 3].includes(role)) { showToast('❌ رتبة غير صالحة'); return; }
+    if (uid === currentUser?.id) { showToast('❌ لا يمكنك تعيين نفسك'); return; }
+
+    const confirmed = await showConfirm(`تعيين ${uid} كـ ${roleLabel(role)}؟`);
+    if (!confirmed) return;
+
+    const { error } = await _supabase
+        .from('staff')
+        .upsert([{ user_id: uid, role }], { onConflict: 'user_id' });
+
+    if (!error) { showToast('✅ تم التعيين'); closeModal('staff-modal'); loadData('staff'); }
+    else showToast('❌ خطأ في التعيين');
+}
+
+// ============================================================
+// ✅ confirmBlacklist
+// ============================================================
+async function confirmBlacklist() {
+    if (currentRole < 2) { showToast('⛔ لا تملك صلاحية'); return; }
+
+    const uid    = sanitize(document.getElementById('bl-uid').value, 20);
+    const reason = sanitize(document.getElementById('bl-msg').value, 500);
+
+    if (!DISCORD_ID_REGEX.test(uid)) {
+        showToast('❌ Discord ID غير صالح');
+        return;
+    }
+    if (!reason) { showToast('أدخل سبب الحظر'); return; }
+    if (uid === currentUser?.id) { showToast('❌ لا يمكنك حظر نفسك'); return; }
+
+    const confirmed = await showConfirm(`حظر المستخدم ${uid}؟`);
+    if (!confirmed) return;
+
+    const { error } = await _supabase
+        .from('blacklist')
+        .upsert([{ user_id: uid, reason }], { onConflict: 'user_id' });
+
+    if (!error) { showToast('✅ تم الحظر'); closeModal('bl-modal'); loadData('blacklist'); }
+    else showToast('❌ خطأ في الحظر');
+}
+
+// ============================================================
+// ✅ openNewsModal
+// ============================================================
+function openNewsModal(table) {
+    if (!ALLOWED_TABLES.has(table)) return;
+    if (currentRole < 3) { showToast('⛔ لا تملك صلاحية'); return; }
+
+    const titleMap = { news:'إضافة خبر', rules:'إضافة قانون' };
+    document.getElementById('news-modal-title').textContent = titleMap[table] || 'إضافة محتوى';
+    document.getElementById('n-title').value = '';
+    document.getElementById('n-txt').value   = '';
+    document.getElementById('news-modal').classList.remove('hidden');
+
+    const saveBtn = document.getElementById('n-save-btn');
+    const newBtn  = saveBtn.cloneNode(true);
+    saveBtn.parentNode.replaceChild(newBtn, saveBtn);
+
+    newBtn.onclick = async () => {
+        const title   = sanitize(document.getElementById('n-title').value, 200);
+        const content = sanitize(document.getElementById('n-txt').value, 2000);
+
+        if (!title)   { showToast('أدخل العنوان');  return; }
+        if (!content) { showToast('أدخل المحتوى'); return; }
+
+        newBtn.disabled    = true;
+        newBtn.textContent = 'جاري النشر...';
+
+        const { error } = await _supabase.from(table).insert([{ title, content }]);
+
+        newBtn.disabled    = false;
+        newBtn.textContent = 'نشر';
+
+        if (!error) { showToast('✅ تم النشر'); closeModal('news-modal'); loadData(table); }
+        else showToast('❌ خطأ في النشر');
+    };
+}
+
+// ============================================================
+// ✅ del
+// ============================================================
+async function del(table, id) {
+    if (currentRole < 3) { showToast('⛔ لا تملك صلاحية'); return; }
+    if (!ALLOWED_TABLES.has(table)) return;
+    if (!id || typeof id !== 'string' || id.length > 50) return;
+
+    const confirmed = await showConfirm('هل أنت متأكد من الحذف نهائياً؟ لا يمكن التراجع.');
+    if (!confirmed) return;
+
+    const { error } = await _supabase.from(table).delete().eq('id', id);
+    if (!error) { showToast('✅ تم الحذف'); loadData(table); }
+    else showToast('❌ فشل الحذف');
+}
+
+function openModal(id) {
+    const allowed = new Set(['app-modal','staff-modal','bl-modal','news-modal']);
+    if (allowed.has(id)) {
+        const el = document.getElementById(id);
+        if (el) { el.classList.remove('hidden'); }
+    }
+}
+
+function closeModal(id) {
+    const allowed = new Set(['app-modal','staff-modal','bl-modal','news-modal']);
+    if (allowed.has(id)) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    }
+}
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        ['app-modal','staff-modal','bl-modal','news-modal'].forEach(closeModal);
+        document.getElementById('confirm-dialog')?.classList.remove('show');
+    }
+});
+
+init();
+</script>
+</body>
+</html>
